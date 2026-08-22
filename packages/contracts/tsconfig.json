@@ -1,0 +1,12 @@
+{
+  "extends": "@workspace/config/typescript/node",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": ".",
+    "paths": {
+      "@workspace/contracts/*": ["./src/*"]
+    }
+  },
+  "include": ["."],
+  "exclude": ["node_modules", "dist"]
+}

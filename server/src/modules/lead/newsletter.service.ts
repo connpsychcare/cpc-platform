@@ -1,0 +1,149 @@
+import type { Request } from "express";
+import { Injectable } from "@nestjs/common";
+import type {
+  NewsletterSubscriberDto,
+  NewsletterSubscriberQueryDto,
+  NewsletterUnSubscriberDto,
+} from "@workspace/contracts/newsletter/dto";
+import { PrismaService } from "@/modules/prisma/prisma.service";
+import { resolveEmailTemplate } from "@workspace/templates";
+import { NotificationService } from "@/modules/notification/notification.service";
+import type { NewsletterSubscriber, Prisma } from "@workspace/db/client";
+import { ClientService } from "@/modules/client/client.service";
+import { getMissingIncludeIds, mergeIncludedRows } from "@/lib/query";
+
+@Injectable()
+export class NewsletterService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notify: NotificationService,
+    private readonly client: ClientService,
+  ) {}
+
+  async subscribe(dto: NewsletterSubscriberDto, req?: Request) {
+    const trafficSourceId = req && this.client.getTrafficSourceId(req);
+
+    const user = await this.prisma.newsletterSubscriber.upsert({
+      where: { email: dto.email },
+      create: {
+        ...dto,
+        trafficSourceId,
+      },
+      update: {
+        ...dto,
+        trafficSourceId,
+      },
+    });
+
+    await this.notifyUser(user);
+
+    return { message: "Subscribed successfully.", data: user };
+  }
+
+  async unsubscribe({ email }: NewsletterUnSubscriberDto) {
+    const user = await this.prisma.newsletterSubscriber.update({
+      where: { email },
+      data: { isActive: false, unsubscribedAt: new Date() },
+    });
+
+    await this.notifyUser(user);
+
+    return { message: "Unsubscribed successfully.", data: user };
+  }
+
+  async list(query: NewsletterSubscriberQueryDto) {
+    const { page, limit, searchBy, search, sortBy, sortOrder, includeIds = [], includeDeleted } = query;
+
+    const where: Prisma.NewsletterSubscriberWhereInput = {
+      deletedAt: includeDeleted ? { not: null } : null,
+    };
+    if (query.isActive !== undefined) where.isActive = query.isActive;
+
+    if (search && searchBy) {
+      const searchWhereMap: Record<
+        typeof searchBy,
+        Prisma.NewsletterSubscriberWhereInput
+      > = {
+        email: {
+          email: { contains: search, mode: "insensitive" },
+        },
+        name: {
+          name: { contains: search, mode: "insensitive" },
+        },
+      };
+      Object.assign(where, searchWhereMap[searchBy]);
+    }
+
+    const skip = (page - 1) * limit;
+    const orderBy = { [sortBy]: sortOrder };
+
+    const [subscribers, total] = await Promise.all([
+      this.prisma.newsletterSubscriber.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy,
+      }),
+      this.prisma.newsletterSubscriber.count({ where }),
+    ]);
+
+    const missingIncludeIds = getMissingIncludeIds(subscribers, includeIds);
+    const forcedSubscribers = missingIncludeIds.length
+      ? await this.prisma.newsletterSubscriber.findMany({
+          where: {
+            id: { in: missingIncludeIds },
+            deletedAt: includeDeleted ? { not: null } : null,
+          },
+        })
+      : [];
+    const mergedSubscribers = mergeIncludedRows(subscribers, forcedSubscribers);
+
+    return {
+      message: "Subscribers fetched successfully.",
+      data: {
+        subscribers: mergedSubscribers,
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async getSubscriber(id: string) {
+    const subscriber = await this.prisma.newsletterSubscriber.findFirstOrThrow({
+      where: { id },
+    });
+
+    return {
+      message: "Subscriber fetched successfully.",
+      data: subscriber,
+    };
+  }
+
+  async deleteSubscriber(id: string) {
+    await this.prisma.newsletterSubscriber.delete({
+      where: { id },
+    });
+
+    return { message: "Subscriber deleted successfully." };
+  }
+
+  async restoreSubscriber(id: string) {
+    await this.prisma.newsletterSubscriber.update({
+      where: { id },
+      data: { deletedAt: null },
+    });
+
+    return { message: "Subscriber restored successfully." };
+  }
+
+  private async notifyUser(newsletterSubscriber: NewsletterSubscriber) {
+    const { subject, html } = await resolveEmailTemplate({
+      purpose: "newsletter",
+      newsletterSubscriber,
+    });
+
+    await this.notify.sendEmail(newsletterSubscriber.email, subject, html);
+  }
+}

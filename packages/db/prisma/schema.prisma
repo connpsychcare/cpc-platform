@@ -1,0 +1,1793 @@
+generator client {
+    provider = "prisma-client"
+    output   = "./generated"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum ThemeMode {
+    light
+    dark
+    system
+}
+
+enum UserRole {
+    admin
+    staff
+    author
+    patient
+}
+
+enum UserStatus {
+    pending
+    active
+    suspended
+}
+
+enum ClientApp {
+    web
+    mobile
+    dashboard
+}
+
+enum OtpType {
+    numericCode
+    secureToken
+}
+
+enum OtpPurpose {
+    setPassword
+    resetPassword
+    changePassword
+    setIdentifier
+    changeIdentifier
+    verifyIdentifier
+    enableMfa
+    disableMfa
+    changeMfa
+    verifyMfa
+}
+
+enum MfaMethod {
+    email
+    sms
+    whatsapp
+    authApp
+}
+
+enum SessionStatus {
+    active
+    revoked
+    expired
+}
+
+enum AuditAction {
+    create
+    update
+    delete
+    login
+    logout
+    statusChange
+}
+
+enum PushProvider {
+    fcm
+    expo
+}
+
+enum NotificationChannel {
+    push
+    email
+    sms
+    whatsapp
+}
+
+enum NotificationStatus {
+    pending
+    partial
+    sent
+    failed
+}
+
+enum NotificationPurpose {
+    signUp
+    signIn
+    verifyMfa
+    updateMfa
+    updatePassword
+    verifyIdentifier
+    updateIdentifier
+    userStatus
+    securityAlert
+
+    refundStatus
+    paymentStatus
+    appointmentStatus
+    appointmentReminder
+
+    sessionNoteAdded
+    treatmentPlanUpdated
+    authorizationAlert
+
+    campaign
+    newChatMessage
+    testimonialRequest
+
+    newsletter
+    contactMessage
+}
+
+enum MediaType {
+    avatar
+    document
+    prescription
+    other
+}
+
+enum MediaVisibility {
+    private
+    public
+}
+
+enum ContactMessageStatus {
+    pending
+    replied
+}
+
+enum Weekday {
+    monday
+    tuesday
+    wednesday
+    thursday
+    friday
+    saturday
+    sunday
+}
+
+enum Gender {
+    male
+    female
+    other
+}
+
+enum IdentificationType {
+    nationalId
+    passport
+    driversLicense
+    other
+}
+
+enum AppointmentChannel {
+    inPerson
+    virtual
+}
+
+enum AppointmentStatus {
+    booked
+    confirmed
+    cancelled
+    completed
+    noShow
+}
+
+enum AppointmentCancellationSource {
+    patient
+    provider
+    admin
+    staff
+}
+
+enum BookingSource {
+    app
+    admin
+}
+
+enum ConversationType {
+    support
+    appointment
+}
+
+enum ConversationStatus {
+    open
+    closed
+}
+
+enum PaymentProvider {
+    stripe
+    paypal
+    manual
+}
+
+enum PaymentMethodType {
+    card
+    wallet
+    bankTransfer
+    cash
+}
+
+enum PaymentStatus {
+    pending
+    succeeded
+    failed
+    refunded
+}
+
+enum RefundStatus {
+    pending
+    processed
+    rejected
+}
+
+enum CampaignStatus {
+    draft
+    scheduled
+    sent
+    failed
+}
+
+enum CaregiverInvitationStatus {
+    pending
+    accepted
+    rejected
+    revoked
+    expired
+}
+
+enum CaregiverRelationship {
+    parent
+    guardian
+    spouse
+    familyMember
+    authorizedCaregiver
+    other
+}
+
+enum CampaignAudience {
+    allUsers
+    patients
+    providers
+    staff
+    custom
+}
+
+// ── E-Commerce ─────────────────────────────────────────────
+
+// ── Permissions ────────────────────────────────────────────
+
+enum PermissionModule {
+    patients
+    appointments
+    clinical
+    media
+    payments
+    messages
+    settings
+    campaigns
+    content
+}
+
+// ── Content / Careers ──────────────────────────────────────
+
+enum PostStatus {
+    draft
+    published
+}
+
+enum JobEmploymentType {
+    fullTime
+    partTime
+    contract
+    internship
+}
+
+enum JobLocationType {
+    onSite
+    remote
+    hybrid
+}
+
+// ── ABA Clinical ───────────────────────────────────────────
+
+enum TreatmentPlanStatus {
+    draft
+    active
+    completed
+    discontinued
+}
+
+enum ProgramType {
+    skillAcquisition
+    behaviorReduction
+}
+
+enum ProgramStatus {
+    active
+    mastered
+    onHold
+    discontinued
+}
+
+enum DataRecordingType {
+    discreteTrial
+    intervalRecording
+    frequencyRate
+    duration
+}
+
+enum DataResponse {
+    correct
+    incorrect
+    prompted
+    noResponse
+}
+
+enum ProgressReportStatus {
+    draft
+    published
+}
+
+enum InsuranceAuthorizationStatus {
+    active
+    expired
+    exhausted
+}
+
+// ── Psychiatric Clinical ────────────────────────────────────
+
+enum ClinicalFormType {
+    phq9
+    gad7
+    asrsAdult
+    vanderbiltParent
+    vanderbiltTeacher
+    adultPsychiatricIntake
+    adolescentPsychiatricIntake
+}
+
+enum PatientAgeGroup {
+    adult
+    adolescent
+}
+
+enum InsuranceRelationship {
+    self
+    spouse
+    child
+    other
+}
+
+enum TeacherTokenStatus {
+    pending
+    completed
+    expired
+}
+
+enum FormAssignmentStatus {
+    pending
+    completed
+    cancelled
+}
+
+// ============================================================
+// CORE MODELS
+// ============================================================
+
+model User {
+    id String @id @default(ulid())
+
+    avatarId String?
+    avatar   Media?  @relation("UserAvatar", fields: [avatarId], references: [id], onDelete: SetNull)
+
+    firstName   String
+    lastName    String?
+    displayName String
+    password    String? @db.VarChar(255)
+
+    email String? @unique @db.VarChar(255)
+    phone String? @unique @db.VarChar(20)
+
+    isEmailVerified Boolean @default(false)
+    isPhoneVerified Boolean @default(false)
+
+    role   UserRole
+    status UserStatus @default(pending)
+
+    preferredTheme    ThemeMode @default(system)
+    pushNotifications Boolean   @default(false)
+
+    preferredMfa MfaMethod?
+    loginAlerts  Boolean    @default(true)
+    lastLoginAt  DateTime?
+
+    onboardingCompletedAt DateTime?
+
+    isDemo Boolean @default(false)
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    // Profiles
+    patientProfile  PatientProfile?
+    providerProfile ProviderProfile?
+    staffProfile    StaffProfile?
+
+    // Auth
+    otps               Otp[]
+    sessions           Session[]
+    auditLogs          AuditLog[]
+    notifications      Notification[]
+    campaignRecipients CampaignRecipient[]
+
+    // Media & messaging
+    uploads      Media[]   @relation("UserUploads")
+    sentMessages Message[] @relation("MessageSender")
+
+    // Appointments
+    createdAppointments Appointment[] @relation("AppointmentCreatedBy")
+
+    // Campaigns
+    createdCampaigns NotificationCampaign[] @relation("CampaignCreatedBy")
+
+    // Provider admin
+    createdProviderProfiles ProviderProfile[] @relation("ProviderProfileCreatedBy")
+
+    // Chat
+    assignedConversations Conversation[] @relation("ConversationAssignedTo")
+
+    // Content
+    posts        Post[]
+    testimonials Testimonial[] @relation("TestimonialAuthor")
+
+    // Payments
+    processedRefunds Refund[] @relation("RefundProcessedBy")
+
+    // E-commerce
+
+    // ABA Clinical
+    createdTreatmentPlans        TreatmentPlan[]       @relation("TreatmentPlanCreatedBy")
+    therapistSessionNotes        SessionNote[]         @relation("SessionNoteTherapist")
+    generatedReports             ProgressReport[]      @relation("ProgressReportGeneratedBy")
+    staffAssignments             StaffAssignment[]     @relation("StaffAssignmentStaff")
+    assignedByAssignments        StaffAssignment[]     @relation("StaffAssignmentAssignedBy")
+    caregiverAccesses            CaregiverAccess[]     @relation("CaregiverAccessUser")
+    grantedCaregiverAccesses     CaregiverAccess[]     @relation("CaregiverAccessGrantedBy")
+    grantedStaffPermissions      StaffPermission[]     @relation("StaffPermissionGrantedBy")
+    sentCaregiverInvitations     CaregiverInvitation[] @relation("CaregiverInvitationSentBy")
+    acceptedCaregiverInvitations CaregiverInvitation[] @relation("CaregiverInvitationAcceptedBy")
+
+    // Psychiatric clinical
+    administeredForms ClinicalFormResponse[]   @relation("FormAdministeredBy")
+    assignedForms     FormAssignment[]         @relation("FormAssignmentAssignedBy")
+    sentTeacherTokens TeacherAssessmentToken[] @relation("TeacherTokenSentBy")
+
+    @@index([role])
+    @@index([status])
+    @@index([deletedAt])
+    @@index([role, status])
+    @@index([role, status, deletedAt])
+}
+
+model Session {
+    id String @id @default(ulid())
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    refreshTokenHash String
+    status           SessionStatus @default(active)
+
+    ip       String
+    location String
+    isp      String?
+    timezone String
+
+    deviceId   String
+    clientApp  ClientApp
+    deviceType String
+    deviceInfo String
+
+    isTrusted  Boolean   @default(false)
+    lastSeenAt DateTime?
+
+    pushProvider PushProvider?
+    pushToken    String?
+
+    createdAt DateTime  @default(now())
+    expiresAt DateTime
+    revokedAt DateTime?
+
+    @@unique([userId, clientApp, deviceId])
+    @@index([expiresAt])
+    @@index([userId, status])
+    @@index([userId, clientApp, status])
+    @@index([expiresAt, status])
+}
+
+model Otp {
+    id String @id @default(ulid())
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    purpose OtpPurpose
+    type    OtpType    @default(numericCode)
+    secret  String
+    meta    Json?
+
+    expiresAt DateTime
+    usedAt    DateTime?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    @@index([userId, purpose])
+    @@index([expiresAt])
+}
+
+model AuditLog {
+    id String @id @default(ulid())
+
+    userId String?
+    user   User?   @relation(fields: [userId], references: [id])
+
+    action AuditAction
+
+    entityType String
+    entityId   String
+
+    meta Json?
+
+    ip        String?
+    userAgent String?
+
+    createdAt DateTime @default(now())
+
+    @@index([userId])
+    @@index([entityType, entityId])
+    @@index([createdAt])
+}
+
+model Notification {
+    id String @id @default(ulid())
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    title     String
+    message   String
+    recipient String
+    meta      Json?
+
+    purpose  NotificationPurpose
+    channels NotificationChannel[]
+    status   NotificationStatus    @default(pending)
+
+    readAt    DateTime?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+
+    @@index([userId, readAt])
+    @@index([userId, createdAt])
+}
+
+model NotificationCampaign {
+    id String @id @default(ulid())
+
+    createdById String
+    createdBy   User   @relation("CampaignCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+    title   String
+    subject String?
+    message String
+    channel NotificationChannel
+
+    audience CampaignAudience
+    status   CampaignStatus   @default(draft)
+
+    scheduledAt DateTime?
+    sentAt      DateTime?
+
+    recipients CampaignRecipient[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([status, scheduledAt])
+}
+
+model CampaignRecipient {
+    id String @id @default(ulid())
+
+    campaignId String
+    campaign   NotificationCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    sentAt DateTime?
+
+    @@unique([campaignId, userId])
+}
+
+model Media {
+    id String @id @default(ulid())
+
+    uploadedById String
+    uploadedBy   User   @relation("UserUploads", fields: [uploadedById], references: [id])
+
+    publicId     String @unique
+    url          String @unique
+    mimeType     String
+    resourceType String
+    size         Int
+    hash         String @unique
+
+    name       String
+    altText    String?
+    type       MediaType
+    visibility MediaVisibility @default(private)
+    notes      String?
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    messageAttachments MessageAttachment[]
+
+    users                          User[]            @relation("UserAvatar")
+    businessLightLogos             BusinessProfile[] @relation("BusinessLogoLight")
+    businessDarkLogos              BusinessProfile[] @relation("BusinessLogoDark")
+    businessCovers                 BusinessProfile[] @relation("BusinessCoverImage")
+    businessFavIcons               BusinessProfile[] @relation("BusinessFavicon")
+    patientIdentificationDocuments PatientProfile[]  @relation("PatientIdentificationDocument")
+    providerLicenseDocuments       ProviderProfile[] @relation("ProviderLicenseDocument")
+    postCovers                     Post[]            @relation("PostCover")
+    postHeaderImages               Post[]            @relation("PostHeaderImage")
+    categoryCovers                 Category[]        @relation("CategoryCover")
+
+    @@index([name])
+    @@index([type])
+    @@index([uploadedById])
+    @@index([createdAt])
+    @@index([deletedAt])
+}
+
+// ============================================================
+// PROFILES
+// ============================================================
+
+model PatientProfile {
+    id String @id @default(ulid())
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    identificationDocumentId String?
+    identificationDocument   Media?  @relation("PatientIdentificationDocument", fields: [identificationDocumentId], references: [id], onDelete: SetNull)
+
+    birthDate DateTime?
+    gender    Gender?
+
+    address    String?
+    occupation String?
+
+    emergencyContactName   String?
+    emergencyContactNumber String? @db.VarChar(20)
+
+    insuranceProvider     String?
+    insurancePolicyNumber String?
+
+    allergies            String?
+    currentMedication    String?
+    familyMedicalHistory String?
+    pastMedicalHistory   String?
+
+    identificationType   IdentificationType?
+    identificationNumber String?
+
+    // Extended insurance details for psychiatric billing
+    insuranceMemberId        String?
+    insuranceGroupNumber     String?
+    insuranceAuthNumber      String?
+    insuranceCopay           Decimal?               @db.Decimal(8, 2)
+    insuranceDeductible      Decimal?               @db.Decimal(10, 2)
+    insurancePhone           String?                @db.VarChar(20)
+    insurancePolicyHolder    String?
+    insurancePolicyHolderDob DateTime?
+    insuranceRelationship    InsuranceRelationship?
+
+    // Emergency contact
+    emergencyContactRelationship String?
+
+    // Age group derived from DOB at onboarding - stored for query performance
+    ageGroup PatientAgeGroup?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Existing relations
+    appointments  Appointment[]
+    conversations Conversation[] @relation("PatientConversations")
+
+    // ABA Clinical relations
+    treatmentPlans          TreatmentPlan[]
+    sessionNotes            SessionNote[]
+    staffAssignments        StaffAssignment[]
+    insuranceAuthorizations InsuranceAuthorization[]
+    progressReports         ProgressReport[]
+    caregiverAccesses       CaregiverAccess[]        @relation("CaregiverAccessPatient")
+    caregiverInvitations    CaregiverInvitation[]    @relation("CaregiverInvitationPatient")
+    testimonials            Testimonial[]
+
+    // Psychiatric clinical relations
+    onboarding              PatientOnboarding?
+    clinicalFormResponses   ClinicalFormResponse[]
+    formAssignments         FormAssignment[]
+    teacherAssessmentTokens TeacherAssessmentToken[]
+}
+
+model ProviderProfile {
+    id String @id @default(ulid())
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    branchId String
+    branch   Branch @relation(fields: [branchId], references: [id], onDelete: Restrict)
+
+    createdById String?
+    createdBy   User?   @relation("ProviderProfileCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+    licenseDocumentId String?
+    licenseDocument   Media?  @relation("ProviderLicenseDocument", fields: [licenseDocumentId], references: [id], onDelete: SetNull)
+
+    slug String  @unique
+    bio  String?
+
+    licenseNumber   String? @unique
+    yearsExperience Int?
+
+    title       String
+    education   String? // human-readable degree
+    credentials String[] // certifications only
+    specialties String[] // core classification
+    languages   String[] @default([])
+
+    consultationFee   Decimal @db.Decimal(10, 2)
+    commissionPercent Decimal @default(0) @db.Decimal(5, 2)
+
+    isAvailable Boolean @default(true)
+
+    /// Controls whether this provider is listed publicly and is bookable by
+    /// patients. Not every staff member with a provider record should appear.
+    isPubliclyListed Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    availabilityRules ProviderAvailability[]
+    blockedSlots      ProviderBlockedTime[]
+    appointments      Appointment[]
+    treatmentPlans    TreatmentPlan[]
+
+    @@index([branchId])
+    @@index([isAvailable])
+    @@index([isPubliclyListed])
+}
+
+model StaffProfile {
+    id String @id @default(ulid())
+
+    userId String @unique
+    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    branchId String
+    branch   Branch @relation(fields: [branchId], references: [id], onDelete: Restrict)
+
+    title       String
+    specialty   String?
+    bio         String?
+    credentials String[] @default([])
+
+    yearsExperience Int?
+    isActive        Boolean @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    permissions StaffPermission[]
+
+    @@index([branchId])
+    @@index([isActive])
+}
+
+model StaffPermission {
+    id String @id @default(ulid())
+
+    staffId String
+    staff   StaffProfile @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+    module PermissionModule
+
+    grantedById String?
+    grantedBy   User?   @relation("StaffPermissionGrantedBy", fields: [grantedById], references: [id], onDelete: SetNull)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([staffId, module])
+    @@index([staffId])
+}
+
+// ============================================================
+// SCHEDULING
+// ============================================================
+
+model ProviderAvailability {
+    id String @id @default(ulid())
+
+    providerId String
+    provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+    weekday   Weekday
+    startTime String
+    endTime   String
+
+    slotDurationMinute Int     @default(30)
+    isActive           Boolean @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@unique([providerId, weekday, startTime, endTime])
+    @@index([providerId, weekday, isActive])
+}
+
+model ProviderBlockedTime {
+    id String @id @default(ulid())
+
+    providerId String
+    provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+    startAt DateTime
+    endAt   DateTime
+    reason  String?
+
+    createdAt DateTime @default(now())
+
+    @@index([providerId, startAt, endAt])
+}
+
+model Appointment {
+    id                String @id @default(ulid())
+    appointmentNumber String @unique
+
+    branchId String
+    branch   Branch @relation(fields: [branchId], references: [id], onDelete: Restrict)
+
+    patientId String
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Restrict)
+
+    providerId String
+    provider   ProviderProfile @relation(fields: [providerId], references: [id], onDelete: Restrict)
+
+    createdById String?
+    createdBy   User?   @relation("AppointmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+    status             AppointmentStatus              @default(booked)
+    cancellationSource AppointmentCancellationSource?
+    bookingSource      BookingSource                  @default(app)
+    channel            AppointmentChannel             @default(inPerson)
+
+    paymentStatus PaymentStatus @default(pending)
+
+    scheduledStartAt DateTime
+    scheduledEndAt   DateTime
+    timezone         String
+
+    patientNotes       String?
+    providerNotes      String?
+    adminNotes         String?
+    cancellationReason String?
+
+    bookedAt       DateTime  @default(now())
+    confirmedAt    DateTime?
+    cancelledAt    DateTime?
+    completedAt    DateTime?
+    paidAt         DateTime?
+    reminderSentAt DateTime?
+
+    payments              Payment[]
+    conversation          Conversation?
+    sessionNote           SessionNote?
+    testimonial           Testimonial?
+    clinicalFormResponses ClinicalFormResponse[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([branchId, scheduledStartAt])
+    @@index([providerId, scheduledStartAt])
+    @@index([patientId, scheduledStartAt])
+    @@index([status, scheduledStartAt])
+    @@index([providerId, status, scheduledStartAt])
+    @@index([patientId, status])
+}
+
+// ============================================================
+// COMMUNICATION
+// ============================================================
+
+model Conversation {
+    id String @id @default(ulid())
+
+    branchId String?
+    branch   Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+    patientId String
+    patient   PatientProfile @relation("PatientConversations", fields: [patientId], references: [id], onDelete: Cascade)
+
+    appointmentId String?      @unique
+    appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+    assignedToId String?
+    assignedTo   User?   @relation("ConversationAssignedTo", fields: [assignedToId], references: [id], onDelete: SetNull)
+
+    type    ConversationType
+    status  ConversationStatus @default(open)
+    subject String?
+
+    lastMessageAt DateTime?
+
+    messages Message[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([branchId, type, status])
+    @@index([patientId, status])
+    @@index([assignedToId, status])
+}
+
+model Message {
+    id String @id @default(ulid())
+
+    conversationId String
+    conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+    senderId String
+    sender   User   @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+    body   String?
+    readAt DateTime?
+
+    attachments MessageAttachment[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([conversationId, createdAt])
+    @@index([conversationId, readAt])
+    @@index([senderId])
+}
+
+model MessageAttachment {
+    id String @id @default(ulid())
+
+    messageId String
+    message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+    mediaId String
+    media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+
+    @@unique([messageId, mediaId])
+    @@index([messageId])
+    @@index([mediaId])
+}
+
+// ============================================================
+// PAYMENTS
+// ============================================================
+
+model Payment {
+    id String @id @default(ulid())
+
+    appointmentId String?
+    appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+    provider   PaymentProvider
+    methodType PaymentMethodType
+    status     PaymentStatus     @default(pending)
+
+    amount Decimal @db.Decimal(10, 2)
+
+    transactionId  String?
+    failureMessage String?
+
+    paidAt     DateTime?
+    refundedAt DateTime?
+
+    metadata Json?
+
+    commissionAmount  Decimal? @db.Decimal(10, 2)
+    providerNetAmount Decimal? @db.Decimal(10, 2)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    refunds Refund[]
+
+    @@index([appointmentId, createdAt])
+    @@index([status, createdAt])
+    @@index([transactionId])
+}
+
+model Refund {
+    id String @id @default(ulid())
+
+    paymentId String
+    payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+    processedById String?
+    processedBy   User?   @relation("RefundProcessedBy", fields: [processedById], references: [id], onDelete: SetNull)
+
+    amount   Decimal      @db.Decimal(10, 2)
+    reason   String?
+    status   RefundStatus @default(pending)
+    metadata Json?
+
+    requestedAt DateTime  @default(now())
+    processedAt DateTime?
+
+    @@index([paymentId, status])
+}
+
+// ============================================================
+// BUSINESS
+// ============================================================
+
+model ContactMessage {
+    id String @id @default(ulid())
+
+    trafficSourceId String?
+    trafficSource   TrafficSource? @relation(fields: [trafficSourceId], references: [id])
+
+    firstName String
+    lastName  String?
+
+    email String @db.VarChar(255)
+    phone String @db.VarChar(20)
+
+    subject String?
+    message String
+
+    status ContactMessageStatus @default(pending)
+    notes  String?
+
+    viewedAt  DateTime?
+    repliedAt DateTime?
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    @@index([email])
+    @@index([status])
+    @@index([createdAt])
+}
+
+model NewsletterSubscriber {
+    id String @id @default(ulid())
+
+    trafficSourceId String?
+    trafficSource   TrafficSource? @relation(fields: [trafficSourceId], references: [id])
+
+    name  String
+    email String @unique @db.VarChar(255)
+
+    isActive Boolean @default(true)
+
+    subscribedAt   DateTime  @default(now())
+    unsubscribedAt DateTime?
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    @@index([email])
+    @@index([createdAt])
+    @@index([isActive])
+}
+
+model TrafficSource {
+    id String @id @default(ulid())
+
+    utmSource   String?
+    utmMedium   String?
+    utmCampaign String?
+    utmTerm     String?
+    utmContent  String?
+
+    referrer    String?
+    landingPage String?
+
+    ip        String?
+    userAgent String?
+
+    createdAt DateTime @default(now())
+
+    contactMessages ContactMessage[]
+    newsletterSubs  NewsletterSubscriber[]
+    postViews       PostView[]
+}
+
+model BranchTiming {
+    id       String @id @default(ulid())
+    branchId String
+    branch   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+    weekday   Weekday
+    openTime  String
+    closeTime String
+    isClosed  Boolean @default(false)
+
+    @@unique([branchId, weekday])
+}
+
+model Branch {
+    id String @id @default(ulid())
+
+    businessProfileId String
+    businessProfile   BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+
+    name String
+    slug String @unique
+
+    email    String  @db.VarChar(255)
+    phone    String  @db.VarChar(20)
+    whatsapp String? @db.VarChar(20)
+
+    street     String
+    city       String
+    state      String
+    postalCode String
+    country    String
+
+    latitude  Decimal? @db.Decimal(10, 7)
+    longitude Decimal? @db.Decimal(10, 7)
+
+    timezone String?
+    isActive Boolean @default(true)
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    branchTimings BranchTiming[]
+    providers     ProviderProfile[]
+    staffMembers  StaffProfile[]
+    appointments  Appointment[]
+    conversations Conversation[]
+
+    @@index([isActive])
+    @@index([city])
+    @@index([country])
+    @@index([businessProfileId])
+    @@index([latitude, longitude])
+    @@index([businessProfileId, isActive])
+}
+
+model BusinessProfile {
+    id String @id @default(ulid())
+
+    name        String
+    legalName   String
+    description String
+
+    faviconId String
+    favicon   Media  @relation("BusinessFavicon", fields: [faviconId], references: [id], onDelete: Restrict)
+
+    logoLightId String
+    logoLight   Media  @relation("BusinessLogoLight", fields: [logoLightId], references: [id], onDelete: Restrict)
+
+    logoDarkId String
+    logoDark   Media  @relation("BusinessLogoDark", fields: [logoDarkId], references: [id], onDelete: Restrict)
+
+    coverId String?
+    cover   Media?  @relation("BusinessCoverImage", fields: [coverId], references: [id])
+
+    email    String  @db.VarChar(255)
+    phone    String  @db.VarChar(20)
+    whatsapp String? @db.VarChar(20)
+    website  String? @db.VarChar(255)
+
+    facebook  String?
+    instagram String?
+    tiktok    String?
+    twitter   String?
+    linkedin  String?
+
+    metaTitle       String
+    metaDescription String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    branches Branch[]
+}
+
+// ============================================================
+// CONTENT
+// ============================================================
+
+model Testimonial {
+    id String @id @default(ulid())
+
+    authorId String?
+    author   User?   @relation("TestimonialAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+
+    patientId String?
+    patient   PatientProfile? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+    appointmentId String?      @unique
+    appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+    authorName  String
+    authorRole  String?
+    content     String  @db.Text
+    rating      Int     @default(5)
+    isPublished Boolean @default(false)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([isPublished, createdAt])
+    @@index([authorId])
+    @@index([patientId])
+}
+
+model JobListing {
+    id String @id @default(ulid())
+
+    title        String
+    type         JobEmploymentType @default(fullTime)
+    locationType JobLocationType   @default(onSite)
+    location     String
+    department   String?
+    description  String            @db.Text
+    requirements String?           @db.Text
+    salary       String?
+    isActive     Boolean           @default(true)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([isActive, type, locationType])
+    @@index([createdAt])
+}
+
+// ============================================================
+// ABA CLINICAL
+// ============================================================
+
+model TreatmentPlan {
+    id String @id @default(ulid())
+
+    patientId String
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Restrict)
+
+    // The clinician who created the plan
+    createdById String
+    createdBy   User   @relation("TreatmentPlanCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+
+    // Optionally supervised by a provider profile
+    providerId String?
+    provider   ProviderProfile? @relation(fields: [providerId], references: [id], onDelete: SetNull)
+
+    title       String
+    description String?
+    goals       String?
+
+    status    TreatmentPlanStatus @default(draft)
+    startDate DateTime?
+    endDate   DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    programs                BehaviorProgram[]
+    sessionNotes            SessionNote[]
+    progressReports         ProgressReport[]
+    insuranceAuthorizations InsuranceAuthorization[]
+
+    @@index([patientId, status])
+    @@index([createdById])
+}
+
+model BehaviorProgram {
+    id String @id @default(ulid())
+
+    treatmentPlanId String
+    treatmentPlan   TreatmentPlan @relation(fields: [treatmentPlanId], references: [id], onDelete: Cascade)
+
+    name        String
+    description String?
+
+    type   ProgramType
+    status ProgramStatus @default(active)
+
+    // Written criteria that must be met before the program is considered mastered
+    masteryDefinition String?
+    // Baseline data description before intervention began
+    baselineData      String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    dataPoints DataPoint[]
+
+    @@index([treatmentPlanId, status])
+    @@index([type])
+}
+
+// Session notes are written by therapists after each therapy session.
+// appointmentId is optional - staff can log sessions without a formal booking
+// (e.g. home visits, school sessions, parent training).
+model SessionNote {
+    id String @id @default(ulid())
+
+    patientId String
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Restrict)
+
+    // The person who conducted the session
+    therapistId String
+    therapist   User   @relation("SessionNoteTherapist", fields: [therapistId], references: [id], onDelete: Restrict)
+
+    treatmentPlanId String?
+    treatmentPlan   TreatmentPlan? @relation(fields: [treatmentPlanId], references: [id], onDelete: SetNull)
+
+    // Optional - links to a formal appointment if one was booked
+    appointmentId String?      @unique
+    appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+    sessionDate     DateTime
+    durationMinutes Int?
+
+    summary        String? @db.Text
+    clientBehavior String? @db.Text
+    nextSteps      String? @db.Text
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    dataPoints DataPoint[]
+
+    @@index([patientId, sessionDate])
+    @@index([therapistId])
+    @@index([treatmentPlanId])
+}
+
+// Trial-by-trial data recorded during or after a session for a specific program.
+model DataPoint {
+    id String @id @default(ulid())
+
+    sessionNoteId String
+    sessionNote   SessionNote @relation(fields: [sessionNoteId], references: [id], onDelete: Cascade)
+
+    programId String
+    program   BehaviorProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+    recordingType DataRecordingType
+    response      DataResponse?
+
+    // Numeric value: percentage correct, frequency count, duration in seconds, etc.
+    value       Decimal? @db.Decimal(10, 4)
+    trialNumber Int?
+    notes       String?
+
+    recordedAt DateTime @default(now())
+
+    @@index([sessionNoteId])
+    @@index([programId])
+}
+
+model ProgressReport {
+    id String @id @default(ulid())
+
+    patientId String
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Restrict)
+
+    treatmentPlanId String?
+    treatmentPlan   TreatmentPlan? @relation(fields: [treatmentPlanId], references: [id], onDelete: SetNull)
+
+    generatedById String
+    generatedBy   User   @relation("ProgressReportGeneratedBy", fields: [generatedById], references: [id], onDelete: Restrict)
+
+    title       String
+    periodStart DateTime
+    periodEnd   DateTime
+
+    // Structured report data (goals summary, session stats, program progress)
+    content Json
+
+    status ProgressReportStatus @default(draft)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([patientId, periodStart])
+    @@index([treatmentPlanId])
+    @@index([status])
+}
+
+// Tracks approved insurance hours per authorization period.
+// usedHours is decremented manually or via session notes.
+model InsuranceAuthorization {
+    id String @id @default(ulid())
+
+    patientId String
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Restrict)
+
+    treatmentPlanId String?
+    treatmentPlan   TreatmentPlan? @relation(fields: [treatmentPlanId], references: [id], onDelete: SetNull)
+
+    insurancePlan       String
+    authorizationNumber String
+
+    startDate DateTime
+    endDate   DateTime
+
+    approvedHours Decimal @db.Decimal(8, 2)
+    usedHours     Decimal @default(0) @db.Decimal(8, 2)
+
+    status InsuranceAuthorizationStatus @default(active)
+    notes  String?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([patientId, status])
+    @@index([endDate])
+}
+
+// A caregiver (parent, guardian) who is linked to view a patient's clinical data.
+// The caregiver has their own User account (patient role) and is granted read
+// access to a specific patient's treatment plans, session notes, and reports.
+model CaregiverAccess {
+    id String @id @default(ulid())
+
+    caregiverId String
+    caregiver   User   @relation("CaregiverAccessUser", fields: [caregiverId], references: [id], onDelete: Cascade)
+
+    patientId String
+    patient   PatientProfile @relation("CaregiverAccessPatient", fields: [patientId], references: [id], onDelete: Cascade)
+
+    grantedById String
+    grantedBy   User   @relation("CaregiverAccessGrantedBy", fields: [grantedById], references: [id], onDelete: Restrict)
+
+    isActive     Boolean               @default(true)
+    relationship CaregiverRelationship @default(parent)
+    notes        String?
+
+    grantedAt DateTime  @default(now())
+    revokedAt DateTime?
+
+    invitation CaregiverInvitation?
+
+    @@unique([caregiverId, patientId])
+    @@index([caregiverId, isActive])
+    @@index([patientId])
+}
+
+model CaregiverInvitation {
+    id String @id @default(ulid())
+
+    patientId String
+    patient   PatientProfile @relation("CaregiverInvitationPatient", fields: [patientId], references: [id], onDelete: Cascade)
+
+    invitedById String
+    invitedBy   User   @relation("CaregiverInvitationSentBy", fields: [invitedById], references: [id], onDelete: Restrict)
+
+    caregiverId String?
+    caregiver   User?   @relation("CaregiverInvitationAcceptedBy", fields: [caregiverId], references: [id], onDelete: SetNull)
+
+    caregiverAccessId String?          @unique
+    caregiverAccess   CaregiverAccess? @relation(fields: [caregiverAccessId], references: [id])
+
+    invitedEmail String
+    relationship CaregiverRelationship     @default(parent)
+    status       CaregiverInvitationStatus @default(pending)
+    token        String                    @unique
+    notes        String?
+
+    expiresAt   DateTime
+    respondedAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([patientId])
+    @@index([status])
+    @@index([token])
+    @@index([invitedEmail])
+}
+
+// Assigns a staff member to a patient for caseload management.
+// Admin or a provider creates the assignment. Staff can only see assigned patients.
+model StaffAssignment {
+    id String @id @default(ulid())
+
+    patientId String
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+    staffId String
+    staff   User   @relation("StaffAssignmentStaff", fields: [staffId], references: [id], onDelete: Cascade)
+
+    assignedById String
+    assignedBy   User   @relation("StaffAssignmentAssignedBy", fields: [assignedById], references: [id], onDelete: Restrict)
+
+    isActive Boolean @default(true)
+    notes    String?
+
+    assignedAt   DateTime  @default(now())
+    unassignedAt DateTime?
+
+    @@unique([patientId, staffId])
+    @@index([staffId, isActive])
+    @@index([patientId])
+}
+
+// ============================================================
+// PSYCHIATRIC CLINICAL
+// ============================================================
+
+// Tracks which onboarding steps the patient has completed.
+// Appointment booking is blocked until completedAt is set.
+model PatientOnboarding {
+    id String @id @default(ulid())
+
+    patientId String         @unique
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+    personalInfoCompletedAt   DateTime?
+    insuranceCompletedAt      DateTime?
+    intakeFormCompletedAt     DateTime?
+    screeningFormsCompletedAt DateTime?
+    consentCompletedAt        DateTime?
+
+    // Consent & e-signature, captured on the final onboarding step
+    hipaaAcknowledged Boolean?
+    consentToTreat    Boolean?
+    telehealthConsent Boolean?
+    signatureName     String?
+    signedAt          DateTime?
+
+    // Set when all required steps are done
+    completedAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([completedAt])
+}
+
+// Stores patient responses to any clinical screening or intake form.
+// Used for onboarding forms, provider-assigned forms, and pre-appointment re-screens.
+model ClinicalFormResponse {
+    id String @id @default(ulid())
+
+    patientId String
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Restrict)
+
+    formType ClinicalFormType
+
+    // Null when patient self-completes; set when administered by staff
+    administeredById String?
+    administeredBy   User?   @relation("FormAdministeredBy", fields: [administeredById], references: [id], onDelete: SetNull)
+
+    // Optional link to the appointment this form was completed for
+    appointmentId String?
+    appointment   Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+    // Full question/answer payload stored as JSON
+    responses Json
+
+    // Computed score for scored instruments (PHQ-9, GAD-7, ASRS)
+    totalScore     Int?
+    interpretation String?
+
+    // True when completed as part of the onboarding flow
+    isOnboarding Boolean @default(false)
+
+    completedAt DateTime @default(now())
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Set when this response was submitted via a teacher token link
+    teacherAssessmentToken TeacherAssessmentToken?
+
+    @@index([patientId, formType])
+    @@index([patientId, completedAt])
+    @@index([appointmentId])
+    @@index([formType, completedAt])
+}
+
+// Allows providers to assign specific forms to patients between appointments.
+model FormAssignment {
+    id String @id @default(ulid())
+
+    patientId String
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+    assignedById String
+    assignedBy   User   @relation("FormAssignmentAssignedBy", fields: [assignedById], references: [id], onDelete: Restrict)
+
+    formType ClinicalFormType
+    status   FormAssignmentStatus @default(pending)
+
+    notes String?
+
+    dueAt       DateTime?
+    completedAt DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([patientId, status])
+    @@index([assignedById])
+    @@index([dueAt])
+}
+
+// Tokenized public link sent to a teacher to complete the Vanderbilt Teacher form.
+// Teacher does not need a platform account - they access via the token URL.
+// On submission, a ClinicalFormResponse is created and linked here.
+model TeacherAssessmentToken {
+    id String @id @default(ulid())
+
+    patientId String
+    patient   PatientProfile @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+    sentById String
+    sentBy   User   @relation("TeacherTokenSentBy", fields: [sentById], references: [id], onDelete: Restrict)
+
+    clinicalFormResponseId String?               @unique
+    clinicalFormResponse   ClinicalFormResponse? @relation(fields: [clinicalFormResponseId], references: [id], onDelete: SetNull)
+
+    token        String  @unique
+    teacherName  String?
+    teacherEmail String  @db.VarChar(255)
+    schoolName   String?
+
+    status TeacherTokenStatus @default(pending)
+
+    sentAt      DateTime  @default(now())
+    completedAt DateTime?
+    expiresAt   DateTime
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([patientId, status])
+    @@index([token])
+    @@index([teacherEmail])
+    @@index([expiresAt, status])
+}
+
+// ============================================================
+// CONTENT / BLOG CMS
+// ============================================================
+
+model Post {
+    id String @id @default(ulid())
+
+    authorId String
+    author   User   @relation(fields: [authorId], references: [id])
+
+    categoryId String?
+    category   Category? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+    title   String?
+    slug    String? @unique
+    excerpt String?
+    content String? @db.Text
+
+    coverId String?
+    cover   Media?  @relation("PostCover", fields: [coverId], references: [id])
+
+    // Background image behind the public blog detail page's title/header
+    // section, distinct from `cover`, which renders inline under the title.
+    headerImageId String?
+    headerImage   Media?  @relation("PostHeaderImage", fields: [headerImageId], references: [id])
+
+    status      PostStatus @default(draft)
+    publishedAt DateTime?
+
+    metaTitle       String?
+    metaDescription String?
+    metaKeywords    String[] @default([])
+
+    viewsCount Int        @default(0)
+    postViews  PostView[]
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    @@index([viewsCount])
+    @@index([title])
+    @@index([slug])
+    @@index([status])
+    @@index([publishedAt])
+    @@index([authorId])
+    @@index([categoryId])
+    @@index([createdAt])
+    @@index([deletedAt])
+}
+
+model PostView {
+    id String @id @default(ulid())
+
+    postId String
+    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+    trafficSourceId String?
+    trafficSource   TrafficSource? @relation(fields: [trafficSourceId], references: [id])
+
+    visitorKey String   @db.VarChar(128)
+    viewedOn   DateTime @db.Date
+    viewedAt   DateTime @default(now())
+
+    // One view per visitor per post per day, so a refresh does not inflate counts.
+    @@unique([postId, visitorKey, viewedOn])
+    @@index([postId])
+    @@index([viewedAt])
+    @@index([postId, viewedAt])
+}
+
+model Category {
+    id          String  @id @default(ulid())
+    name        String  @unique
+    slug        String  @unique
+    description String?
+
+    metaTitle       String?
+    metaDescription String?
+
+    coverId String?
+    cover   Media?  @relation("CategoryCover", fields: [coverId], references: [id])
+
+    parentId String?
+    parent   Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+
+    children Category[] @relation("CategoryHierarchy")
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    posts Post[]
+
+    @@index([name])
+    @@index([parentId])
+    @@index([slug])
+    @@index([createdAt])
+    @@index([deletedAt])
+}
+
+model PageView {
+    id       String   @id @default(ulid())
+    path     String
+    referrer String?
+    viewedAt DateTime @default(now())
+
+    @@index([viewedAt])
+    @@index([path])
+}

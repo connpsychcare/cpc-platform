@@ -1,0 +1,44 @@
+{
+  "name": "web",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack -p 3000",
+    "build": "next build",
+    "postbuild": "next-sitemap --config sitemap.config.cjs",
+    "start": "next start",
+    "lint": "eslint",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@next/third-parties": "^16.2.6",
+    "@stripe/react-stripe-js": "^6.1.0",
+    "@stripe/stripe-js": "^9.0.1",
+    "@tabler/icons-react": "^3.41.1",
+    "@tanstack/react-form": "^1.28.6",
+    "@tanstack/react-query": "^5.96.1",
+    "@workspace/sdk": "workspace:*",
+    "@workspace/shared": "workspace:*",
+    "@workspace/ui": "workspace:*",
+    "lucide-react": "^0.563.0",
+    "motion": "^12.38.0",
+    "next": "16.1.6",
+    "next-sitemap": "^4.2.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sonner": "^2.0.7",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@workspace/config": "workspace:*",
+    "@workspace/contracts": "workspace:*",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.2"
+  }
+}

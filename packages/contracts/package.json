@@ -1,0 +1,305 @@
+{
+  "name": "@workspace/contracts",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "license": "ISC",
+  "scripts": {
+    "build": "tsdown",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.mts"
+    },
+    "./auth": {
+      "import": "./dist/auth.mjs",
+      "types": "./dist/auth.d.mts"
+    },
+    "./auth/dto": {
+      "import": "./dist/auth/dto.mjs",
+      "types": "./dist/auth/dto.d.mts"
+    },
+    "./user": {
+      "import": "./dist/user.mjs",
+      "types": "./dist/user.d.mts"
+    },
+    "./user/dto": {
+      "import": "./dist/user/dto.mjs",
+      "types": "./dist/user/dto.d.mts"
+    },
+    "./admin": {
+      "import": "./dist/admin.mjs",
+      "types": "./dist/admin.d.mts"
+    },
+    "./admin/dto": {
+      "import": "./dist/admin/dto.mjs",
+      "types": "./dist/admin/dto.d.mts"
+    },
+    "./business": {
+      "import": "./dist/business.mjs",
+      "types": "./dist/business.d.mts"
+    },
+    "./business/dto": {
+      "import": "./dist/business/dto.mjs",
+      "types": "./dist/business/dto.d.mts"
+    },
+    "./job-listing": {
+      "import": "./dist/job-listing.mjs",
+      "types": "./dist/job-listing.d.mts"
+    },
+    "./job-listing/dto": {
+      "import": "./dist/job-listing/dto.mjs",
+      "types": "./dist/job-listing/dto.d.mts"
+    },
+    "./testimonial": {
+      "import": "./dist/testimonial.mjs",
+      "types": "./dist/testimonial.d.mts"
+    },
+    "./testimonial/dto": {
+      "import": "./dist/testimonial/dto.mjs",
+      "types": "./dist/testimonial/dto.d.mts"
+    },
+    "./patient": {
+      "import": "./dist/patient.mjs",
+      "types": "./dist/patient.d.mts"
+    },
+    "./patient/dto": {
+      "import": "./dist/patient/dto.mjs",
+      "types": "./dist/patient/dto.d.mts"
+    },
+    "./post": {
+      "import": "./dist/post.mjs",
+      "types": "./dist/post.d.mts"
+    },
+    "./post/dto": {
+      "import": "./dist/post/dto.mjs",
+      "types": "./dist/post/dto.d.mts"
+    },
+    "./category": {
+      "import": "./dist/category.mjs",
+      "types": "./dist/category.d.mts"
+    },
+    "./category/dto": {
+      "import": "./dist/category/dto.mjs",
+      "types": "./dist/category/dto.d.mts"
+    },
+    "./provider": {
+      "import": "./dist/provider.mjs",
+      "types": "./dist/provider.d.mts"
+    },
+    "./provider/dto": {
+      "import": "./dist/provider/dto.mjs",
+      "types": "./dist/provider/dto.d.mts"
+    },
+    "./availability": {
+      "import": "./dist/availability.mjs",
+      "types": "./dist/availability.d.mts"
+    },
+    "./availability/dto": {
+      "import": "./dist/availability/dto.mjs",
+      "types": "./dist/availability/dto.d.mts"
+    },
+    "./appointment": {
+      "import": "./dist/appointment.mjs",
+      "types": "./dist/appointment.d.mts"
+    },
+    "./appointment/dto": {
+      "import": "./dist/appointment/dto.mjs",
+      "types": "./dist/appointment/dto.d.mts"
+    },
+    "./chat": {
+      "import": "./dist/chat.mjs",
+      "types": "./dist/chat.d.mts"
+    },
+    "./chat/dto": {
+      "import": "./dist/chat/dto.mjs",
+      "types": "./dist/chat/dto.d.mts"
+    },
+    "./payment": {
+      "import": "./dist/payment.mjs",
+      "types": "./dist/payment.d.mts"
+    },
+    "./payment/dto": {
+      "import": "./dist/payment/dto.mjs",
+      "types": "./dist/payment/dto.d.mts"
+    },
+    "./campaign": {
+      "import": "./dist/campaign.mjs",
+      "types": "./dist/campaign.d.mts"
+    },
+    "./campaign/dto": {
+      "import": "./dist/campaign/dto.mjs",
+      "types": "./dist/campaign/dto.d.mts"
+    },
+    "./audit": {
+      "import": "./dist/audit.mjs",
+      "types": "./dist/audit.d.mts"
+    },
+    "./audit/dto": {
+      "import": "./dist/audit/dto.mjs",
+      "types": "./dist/audit/dto.d.mts"
+    },
+    "./traffic": {
+      "import": "./dist/traffic.mjs",
+      "types": "./dist/traffic.d.mts"
+    },
+    "./traffic/dto": {
+      "import": "./dist/traffic/dto.mjs",
+      "types": "./dist/traffic/dto.d.mts"
+    },
+    "./contact": {
+      "import": "./dist/contact.mjs",
+      "types": "./dist/contact.d.mts"
+    },
+    "./contact/dto": {
+      "import": "./dist/contact/dto.mjs",
+      "types": "./dist/contact/dto.d.mts"
+    },
+    "./newsletter": {
+      "import": "./dist/newsletter.mjs",
+      "types": "./dist/newsletter.d.mts"
+    },
+    "./newsletter/dto": {
+      "import": "./dist/newsletter/dto.mjs",
+      "types": "./dist/newsletter/dto.d.mts"
+    },
+    "./dashboard": {
+      "import": "./dist/dashboard.mjs",
+      "types": "./dist/dashboard.d.mts"
+    },
+    "./media": {
+      "import": "./dist/media.mjs",
+      "types": "./dist/media.d.mts"
+    },
+    "./media/dto": {
+      "import": "./dist/media/dto.mjs",
+      "types": "./dist/media/dto.d.mts"
+    },
+    "./notification": {
+      "import": "./dist/notification.mjs",
+      "types": "./dist/notification.d.mts"
+    },
+    "./notification/dto": {
+      "import": "./dist/notification/dto.mjs",
+      "types": "./dist/notification/dto.d.mts"
+    },
+    "./staff": {
+      "import": "./dist/staff.mjs",
+      "types": "./dist/staff.d.mts"
+    },
+    "./staff/dto": {
+      "import": "./dist/staff/dto.mjs",
+      "types": "./dist/staff/dto.d.mts"
+    },
+    "./treatment-plan": {
+      "import": "./dist/treatment-plan.mjs",
+      "types": "./dist/treatment-plan.d.mts"
+    },
+    "./treatment-plan/dto": {
+      "import": "./dist/treatment-plan/dto.mjs",
+      "types": "./dist/treatment-plan/dto.d.mts"
+    },
+    "./behavior-program": {
+      "import": "./dist/behavior-program.mjs",
+      "types": "./dist/behavior-program.d.mts"
+    },
+    "./behavior-program/dto": {
+      "import": "./dist/behavior-program/dto.mjs",
+      "types": "./dist/behavior-program/dto.d.mts"
+    },
+    "./session-note": {
+      "import": "./dist/session-note.mjs",
+      "types": "./dist/session-note.d.mts"
+    },
+    "./session-note/dto": {
+      "import": "./dist/session-note/dto.mjs",
+      "types": "./dist/session-note/dto.d.mts"
+    },
+    "./data-point": {
+      "import": "./dist/data-point.mjs",
+      "types": "./dist/data-point.d.mts"
+    },
+    "./data-point/dto": {
+      "import": "./dist/data-point/dto.mjs",
+      "types": "./dist/data-point/dto.d.mts"
+    },
+    "./staff-assignment": {
+      "import": "./dist/staff-assignment.mjs",
+      "types": "./dist/staff-assignment.d.mts"
+    },
+    "./staff-assignment/dto": {
+      "import": "./dist/staff-assignment/dto.mjs",
+      "types": "./dist/staff-assignment/dto.d.mts"
+    },
+    "./insurance-authorization": {
+      "import": "./dist/insurance-authorization.mjs",
+      "types": "./dist/insurance-authorization.d.mts"
+    },
+    "./insurance-authorization/dto": {
+      "import": "./dist/insurance-authorization/dto.mjs",
+      "types": "./dist/insurance-authorization/dto.d.mts"
+    },
+    "./caregiver-access": {
+      "import": "./dist/caregiver-access.mjs",
+      "types": "./dist/caregiver-access.d.mts"
+    },
+    "./caregiver-access/dto": {
+      "import": "./dist/caregiver-access/dto.mjs",
+      "types": "./dist/caregiver-access/dto.d.mts"
+    },
+    "./staff-permission": {
+      "import": "./dist/staff-permission.mjs",
+      "types": "./dist/staff-permission.d.mts"
+    },
+    "./staff-permission/dto": {
+      "import": "./dist/staff-permission/dto.mjs",
+      "types": "./dist/staff-permission/dto.d.mts"
+    },
+    "./clinical-form": {
+      "import": "./dist/clinical-form.mjs",
+      "types": "./dist/clinical-form.d.mts"
+    },
+    "./clinical-form/dto": {
+      "import": "./dist/clinical-form/dto.mjs",
+      "types": "./dist/clinical-form/dto.d.mts"
+    },
+    "./progress-report": {
+      "import": "./dist/progress-report.mjs",
+      "types": "./dist/progress-report.d.mts"
+    },
+    "./progress-report/dto": {
+      "import": "./dist/progress-report/dto.mjs",
+      "types": "./dist/progress-report/dto.d.mts"
+    },
+    "./onboarding": {
+      "import": "./dist/onboarding.mjs",
+      "types": "./dist/onboarding.d.mts"
+    },
+    "./onboarding/dto": {
+      "import": "./dist/onboarding/dto.mjs",
+      "types": "./dist/onboarding/dto.d.mts"
+    },
+    "./lib/schema": {
+      "import": "./dist/lib/schema.mjs",
+      "types": "./dist/lib/schema.d.mts"
+    }
+  },
+  "dependencies": {
+    "@workspace/db": "workspace:*",
+    "@workspace/shared": "workspace:*",
+    "nestjs-zod": "^5.2.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/node": "^25.5.0",
+    "react": "^19.2.4",
+    "@types/react": "^19.2.14",
+    "@workspace/config": "workspace:*",
+    "eslint": "^9.39.4",
+    "tsdown": "0.21.7"
+  }
+}

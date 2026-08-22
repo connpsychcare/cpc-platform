@@ -1,0 +1,13 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /auth/
+Disallow: /patient/
+Disallow: /cart
+Disallow: /checkout
+
+# Host
+Host: https://connectedpsychiatriccare.com
+
+# Sitemaps
+Sitemap: https://connectedpsychiatriccare.com/sitemap.xml

@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "503983791883",
+    "project_id": "cpc-platform",
+    "storage_bucket": "cpc-platform.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503983791883:android:f40abb5bd61f3bed038c0e",
+        "android_client_info": {
+          "package_name": "com.zhxlabs.ConnectedPsychiatricCare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "503983791883-efc4hvs8lpvcr2ordmmc748dof0d1v7h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zhxlabs.ConnectedPsychiatricCare",
+            "certificate_hash": "cc7466e569ea1c1619d061f0ea1d311b19c55433"
+          }
+        },
+        {
+          "client_id": "503983791883-be5c2o66fd84dfanbhdpjpc419d3l42c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArZSdTXQvhQX0ihscktqYEVCC5_HFFJyE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "503983791883-be5c2o66fd84dfanbhdpjpc419d3l42c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "503983791883-12g856tmc8fbpk41dsokbp5a9428ri8i.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.zhxlabs.ConnectedPsychiatricCare"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:503983791883:android:4b17c128970343e8038c0e",
+        "android_client_info": {
+          "package_name": "com.zhxlabs.ConnectedPsychiatricCare.dev"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "503983791883-nk6dsggd5mv14i7769l2nai5fqkbgktv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.zhxlabs.ConnectedPsychiatricCare.dev",
+            "certificate_hash": "cc83b787b296083f066586a42c63e4dafc7954e8"
+          }
+        },
+        {
+          "client_id": "503983791883-be5c2o66fd84dfanbhdpjpc419d3l42c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArZSdTXQvhQX0ihscktqYEVCC5_HFFJyE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "503983791883-be5c2o66fd84dfanbhdpjpc419d3l42c.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "503983791883-12g856tmc8fbpk41dsokbp5a9428ri8i.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.zhxlabs.ConnectedPsychiatricCare"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

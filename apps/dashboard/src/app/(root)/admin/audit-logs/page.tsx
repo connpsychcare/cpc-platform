@@ -1,0 +1,67 @@
+"use client";
+
+import { Badge } from "@workspace/ui/components/badge";
+import { AuditActionEnum } from "@workspace/contracts";
+import type {
+  AuditLogQueryType,
+  AuditLogResponse,
+} from "@workspace/contracts/audit";
+
+import { useAuditLogs } from "@/hooks/audit";
+import ListPage from "@workspace/ui/shared/ListPage";
+import type { ColumnConfig } from "@workspace/ui/shared/GenericTable";
+import type { SearchByOption } from "@workspace/ui/shared/FilterBar";
+import { formatDate } from "@workspace/shared/utils";
+
+const auditColumns: ColumnConfig<AuditLogResponse, AuditLogQueryType>[] = [
+  {
+    header: "Action",
+    accessor: (log) => <Badge variant="secondary">{log.action}</Badge>,
+    sortKey: "createdAt",
+  },
+  {
+    header: "Entity Type",
+    accessor: "entityType",
+    sortKey: "entityType",
+  },
+  {
+    header: "Entity Id",
+    accessor: "entityId",
+  },
+  {
+    header: "User",
+    accessor: (log) => log.user?.displayName,
+  },
+  {
+    header: "Created",
+    accessor: (log) => formatDate(log.createdAt),
+    sortKey: "createdAt",
+  },
+];
+
+const auditSearchOptions: SearchByOption<AuditLogQueryType>[] = [
+  { value: "entityType", label: "Entity Type" },
+  { value: "entityId", label: "Entity Id" },
+  { value: "userId", label: "User Id" },
+];
+
+const AuditLogsPage = () => {
+  return (
+    <ListPage
+      dataKey={"logs"}
+      entityType="audit-logs"
+      canAdd={false}
+      canEdit={false}
+      columns={auditColumns}
+      searchByOptions={auditSearchOptions}
+      useListHook={useAuditLogs}
+      defaultSortBy="createdAt"
+      defaultSearchBy="entityType"
+      filterConfig={[
+        { key: "action", label: "Action", options: AuditActionEnum.options },
+      ]}
+    />
+  );
+};
+
+export default AuditLogsPage;

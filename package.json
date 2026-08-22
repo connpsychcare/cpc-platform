@@ -1,0 +1,34 @@
+{
+  "name": "connected-psychiatric-care",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "format": "turbo format",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "update:deps": "pnpm update -r",
+    "check-types": "turbo check-types",
+    "build:web": "turbo build --filter=web",
+    "start:web": "cd apps/web && pnpm start",
+    "build:dashboard": "turbo build --filter=dashboard",
+    "start:dashboard": "cd apps/dashboard && pnpm start",
+    "build:server": "turbo build --filter=server",
+    "start:server": "cd server && pnpm start",
+    "build:packages": "turbo build --filter=@workspace/*",
+    "prune:server": "turbo prune server --docker"
+  },
+  "devDependencies": {
+    "@workspace/config": "workspace:*",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "turbo": "^2.9.3",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=24"
+  }
+}

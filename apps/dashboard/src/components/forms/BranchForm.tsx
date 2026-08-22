@@ -1,0 +1,145 @@
+"use client";
+
+import { Badge } from "@workspace/ui/components/badge";
+import { FormSection } from "@workspace/ui/components/form";
+import { InputField } from "@workspace/ui/components/input-field";
+import { PhoneField } from "@workspace/ui/components/phone-field";
+import { SwitchField } from "@workspace/ui/components/switch-field";
+import { type BaseCUFormProps, WeekdayEnum } from "@workspace/contracts";
+import {
+  CUBranchSchema,
+  type CUBranchType,
+} from "@workspace/contracts/business";
+import { GenericForm } from "@workspace/ui/shared/GenericForm";
+import { USAddressFields } from "@workspace/ui/shared/USAddressFields";
+import { US_COUNTRY_VALUE } from "@workspace/ui/lib/us-address";
+import type { ColumnConfig } from "@workspace/ui/shared/GenericTable";
+import GenericArrayField from "@workspace/ui/shared/GenericArrayField";
+
+import { useBranch } from "@/hooks/business";
+import BranchTimingField from "./BranchTimingField";
+
+const formatWeekday = (weekday: string) =>
+  weekday.charAt(0).toUpperCase() + weekday.slice(1);
+
+const defaultBranchTimings: CUBranchType["branchTimings"] =
+  WeekdayEnum.options.map((weekday) => ({
+    weekday,
+    openTime: "09:00",
+    closeTime: "18:00",
+    isClosed: false,
+  }));
+
+const timingColumns: ColumnConfig<CUBranchType["branchTimings"][number]>[] = [
+  {
+    header: "Day",
+    accessor: (timing) => formatWeekday(timing.weekday),
+  },
+  {
+    header: "Hours",
+    accessor: (timing) =>
+      timing.isClosed ? "Closed" : `${timing.openTime} - ${timing.closeTime}`,
+  },
+  {
+    header: "Availability",
+    accessor: (timing) => (
+      <Badge variant={timing.isClosed ? "secondary" : "success"}>
+        {timing.isClosed ? "Closed" : "Open"}
+      </Badge>
+    ),
+  },
+];
+
+const BranchForm = ({ formType, entityId }: BaseCUFormProps) => (
+  <GenericForm
+    entityId={entityId}
+    formType={formType}
+    entityName="Branch"
+    description="Manage branch identity, contact details, and operating schedule."
+    schema={CUBranchSchema}
+    useQuery={useBranch}
+    defaultValues={{
+      isActive: true,
+      branchTimings: defaultBranchTimings,
+      country: US_COUNTRY_VALUE,
+    }}
+  >
+    {(form) => (
+      <>
+        <SwitchField
+          form={form}
+          name="isActive"
+          label="Branch Active"
+          desc="Keep this enabled while the branch is available for operations."
+        />
+
+        <FormSection
+          title="Branch Information"
+          description="Core identity details used across the dashboard and website."
+        >
+          <InputField form={form} name="name" label="Branch Name" />
+          <InputField form={form} name="slug" label="Slug" />
+          <InputField form={form} name="email" label="Email" type="email" />
+          <PhoneField form={form} name="phone" label="Phone" />
+          <PhoneField form={form} name="whatsapp" label="WhatsApp" />
+          <InputField
+            form={form}
+            name="timezone"
+            label="Timezone"
+            placeholder="e.g. Asia/Dubai"
+          />
+        </FormSection>
+
+        <FormSection
+          title="Address"
+          description="Public branch address and optional location details."
+        >
+          <InputField
+            form={form}
+            name="street"
+            label="Street"
+            className="col-span-2"
+          />
+          <USAddressFields
+            form={form}
+            stateFieldName="state"
+            cityFieldName="city"
+          />
+          <InputField form={form} name="postalCode" label="Postal Code" />
+          <InputField
+            form={form}
+            name="latitude"
+            label="Latitude"
+            type="number"
+            min={1}
+            step={1}
+            handleChange={(value, commit) =>
+              commit(value === "" ? undefined : Number(value))
+            }
+          />
+          <InputField
+            form={form}
+            name="longitude"
+            label="Longitude"
+            type="number"
+            min={1}
+            step={1}
+            handleChange={(value, commit) =>
+              commit(value === "" ? undefined : Number(value))
+            }
+          />
+        </FormSection>
+
+        <GenericArrayField
+          form={form}
+          name="branchTimings"
+          label="Operating Schedule"
+          FormItem={BranchTimingField}
+          columns={timingColumns}
+        />
+      </>
+    )}
+  </GenericForm>
+);
+
+export default BranchForm;
